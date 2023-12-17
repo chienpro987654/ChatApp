@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            contentTextBox = new TextBox();
+            contentTextBox = new RichTextBox();
             chatTextBox = new TextBox();
             label1 = new Label();
             sendButton = new Button();
@@ -36,17 +36,17 @@
             waitLabel = new Label();
             joinButton = new Button();
             startGameButton = new Button();
+            colorComboBox = new ComboBox();
             SuspendLayout();
             // 
             // contentTextBox
             // 
             contentTextBox.Location = new Point(12, 12);
-            contentTextBox.Multiline = true;
             contentTextBox.Name = "contentTextBox";
             contentTextBox.ReadOnly = true;
-            contentTextBox.ScrollBars = ScrollBars.Vertical;
             contentTextBox.Size = new Size(762, 383);
             contentTextBox.TabIndex = 0;
+            contentTextBox.Text = "";
             // 
             // chatTextBox
             // 
@@ -114,11 +114,21 @@
             startGameButton.UseVisualStyleBackColor = true;
             startGameButton.Click += startGameButton_Click;
             // 
+            // colorComboBox
+            // 
+            colorComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            colorComboBox.FormattingEnabled = true;
+            colorComboBox.Location = new Point(623, 404);
+            colorComboBox.Name = "colorComboBox";
+            colorComboBox.Size = new Size(151, 28);
+            colorComboBox.TabIndex = 8;
+            // 
             // ChatForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(786, 496);
+            Controls.Add(colorComboBox);
             Controls.Add(startGameButton);
             Controls.Add(joinButton);
             Controls.Add(waitLabel);
@@ -131,14 +141,14 @@
             MaximizeBox = false;
             Name = "ChatForm";
             Text = "ChatForm";
-            FormClosing += ChatForm_FormClosing;
+            FormClosed += ChatForm_FormClosed;
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private TextBox contentTextBox;
+        private RichTextBox contentTextBox;
         private TextBox chatTextBox;
         private Label label1;
         private Button sendButton;
@@ -146,5 +156,6 @@
         private Label waitLabel;
         private Button joinButton;
         private Button startGameButton;
+        private ComboBox colorComboBox;
     }
 }

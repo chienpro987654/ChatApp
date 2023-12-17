@@ -22,6 +22,8 @@ namespace ChatApp
         bool isChatting = true;
         int playerRole = -1;
 
+        private CancellationTokenSource tokenSource;
+
         public bool isPlaying;
 
         public static string globalName;
@@ -40,6 +42,9 @@ namespace ChatApp
         public const int END_GAME = 8;
 
         public int[,] gameArr = new int[20, 20];
+
+        string[] colorArr = { "Black", "Red", "Green", "Blue", "Yellow" };
+        Color[] colors = { Color.Black, Color.Red, Color.Green, Color.Blue, Color.Yellow };
 
         public class JsonMessage()
         {
@@ -66,7 +71,12 @@ namespace ChatApp
 
             instance = this;
 
+            tokenSource = new CancellationTokenSource();
+
             globalName = name;
+
+            colorComboBox.Items.AddRange(colorArr);
+            colorComboBox.SelectedIndex = 0;
 
             if (isHost)
             {
@@ -209,6 +219,7 @@ namespace ChatApp
                 }
 
             }
+            Debug.WriteLine("Stop Creare Connection As Server");
         }
 
         private void receiveMessageAsServer(object clientObj)
@@ -269,18 +280,15 @@ namespace ChatApp
                                 }));
                             }
                         }
-                        if (chatData.type == GAME_STEP)
-                        {
-                            Debug.WriteLine(chatData.message);
-                        }
                         string messageToDisplay = chatData.name + " (" + chatData.dateTime + "): " + chatData.message;
-                        displayLocalMessage(messageToDisplay);
+                        displayLocalMessage(messageToDisplay, chatData.color);
                         BroadcastMessage(clientMessage, chatData.id);
                     }
                     if (jsonMessage.type == GAME_TYPE)
                     {
                         if (chatData.type == GAME_STEP)
                         {
+                            Debug.WriteLine(chatData.message);
                             if (chatData.targetId == globalId)
                             {
                                 Debug.WriteLine(chatData.message);
@@ -315,7 +323,12 @@ namespace ChatApp
                             }
                             else
                             {
+                                string messageToDisplay = chatData.name + " (" + chatData.dateTime + "): " + chatData.message;
+                                displayLocalMessage(messageToDisplay);
                                 BroadcastMessage(clientMessage, chatData.id);
+                                sendChatData($"{chatData.name} win!");
+                                messageToDisplay = "Notification: " + $"{chatData.name} win!";
+                                displayLocalMessage(messageToDisplay);
                             }
                         }
                     }
@@ -333,6 +346,7 @@ namespace ChatApp
             }
 
             tcpClient.Close();
+            Debug.WriteLine("Stop Receive Message As Server");
         }
 
         private void receiveMessageAsClient()
@@ -400,7 +414,7 @@ namespace ChatApp
                         //    }
                         //}
                         string messageToDisplay = chatData.name + " (" + chatData.dateTime + "): " + chatData.message;
-                        displayLocalMessage(messageToDisplay);
+                        displayLocalMessage(messageToDisplay, chatData.color);
                     }
 
                     if (jsonMessage.type == SEND_ID_TYPE)
@@ -429,11 +443,18 @@ namespace ChatApp
                             }
                         }
 
-                        if (chatData.type == END_GAME && chatData.targetId == globalId)
+                        if (chatData.type == END_GAME)
                         {
-                            MessageBox.Show(chatData.id + " win!");
-                            this.Enabled = false;
-                            PlayForm.instance.Close();
+                            if (chatData.targetId == globalId)
+                            {
+                                MessageBox.Show(chatData.id + " win!");
+                                this.Enabled = false;
+                                PlayForm.instance.Close();
+                            }
+                            else
+                            {
+
+                            }
                         }
 
 
@@ -445,8 +466,9 @@ namespace ChatApp
             Close();
         }
 
-        private void displayLocalMessage(string message)
+        private void displayLocalMessage(string message, int colorNumber = -1)
         {
+            contentTextBox.SelectionColor = (colorNumber == -1) ? Color.Black : colors[colorNumber];
             contentTextBox.AppendText("\r\n" + message);
         }
 
@@ -460,7 +482,7 @@ namespace ChatApp
                     id = globalId,
                     name = globalName,
                     message = (customMessage == "") ? chatTextBox.Text : customMessage,
-                    color = 1,
+                    color = colorComboBox.SelectedIndex,
                     dateTime = DateTime.Now,
 
                     type = type,
@@ -479,7 +501,7 @@ namespace ChatApp
                 clientStream.Flush();
             }
             string messageToDisplay = "You (" + DateTime.Now.ToString() + "): " + ((customMessage == "") ? chatTextBox.Text : customMessage);
-            displayLocalMessage(messageToDisplay);
+            displayLocalMessage(messageToDisplay, colorComboBox.SelectedIndex);
             chatTextBox.Clear();
         }
 
@@ -668,18 +690,22 @@ namespace ChatApp
             }
         }
 
-
-
-        private void ChatForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             isChatting = false;
-            if (server != null)
+            PlayForm.instance.Close();
+            if (isServer)
             {
-                server.Stop();
+                if (server != null)
+                {
+                    server.Stop();
+                }
+                foreach (TcpClient client in clients)
+                {
+                    client.Close();
+                }
+                this.Dispose();
             }
-            Application.Exit();
         }
-
-
     }
 }
