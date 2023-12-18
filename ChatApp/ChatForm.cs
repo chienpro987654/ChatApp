@@ -20,9 +20,7 @@ namespace ChatApp
 
         bool isServer = false;
         bool isChatting = true;
-        int playerRole = -1;
-
-        private CancellationTokenSource tokenSource;
+        public int playerRole = -1;
 
         public bool isPlaying;
 
@@ -45,8 +43,8 @@ namespace ChatApp
 
         public int[,] gameArr = new int[20, 20];
 
-        string[] colorArr = { "Black", "Red", "Green", "Blue", "Yellow" };
-        Color[] colors = { Color.Black, Color.Red, Color.Green, Color.Blue, Color.Yellow };
+        string[] colorArr = { "Black", "Red", "Green", "Blue", "Purple" };
+        Color[] colors = { Color.Black, Color.Red, Color.Green, Color.Blue, Color.Purple };
 
         public class JsonMessage()
         {
@@ -72,8 +70,6 @@ namespace ChatApp
             CheckForIllegalCrossThreadCalls = false;
 
             instance = this;
-
-            tokenSource = new CancellationTokenSource();
 
             globalName = name;
 
@@ -301,13 +297,16 @@ namespace ChatApp
                                     PlayForm.instance.checkClickable(x, y, 1);
                                     PlayForm.instance.drawX(x, y);
                                     PlayForm.instance.playerTurn = 2;
+                                    PlayForm.instance.changeTurnLabel();
                                 }
                                 else
                                 {
                                     PlayForm.instance.checkClickable(x, y, 2);
                                     PlayForm.instance.drawO(x, y);
                                     PlayForm.instance.playerTurn = 1;
+                                    PlayForm.instance.changeTurnLabel();
                                 }
+                                PlayForm.instance.isClickable = true;
                             }
                             else
                             {
@@ -368,7 +367,7 @@ namespace ChatApp
                                 PlayForm.instance.Close();
                             }
                             BroadcastMessage(clientMessage, chatData.id);
-                            string messageToDisplay = "Notification: " + $"{globalName} win!";
+                            string messageToDisplay = "Notification: " + $"{chatData.name} has surrendered!";
                             displayLocalMessage(messageToDisplay, 2);
                             updateButton(1);
                         }
@@ -454,18 +453,22 @@ namespace ChatApp
                             Debug.WriteLine(chatData.message);
                             int.TryParse(chatData.message.Split(':')[0], out int x);
                             int.TryParse(chatData.message.Split(':')[1], out int y);
+
                             if (playerRole == 2)
                             {
                                 PlayForm.instance.checkClickable(x, y, 1);
                                 PlayForm.instance.drawX(x, y);
                                 PlayForm.instance.playerTurn = 2;
+                                PlayForm.instance.changeTurnLabel();
                             }
                             else
                             {
                                 PlayForm.instance.checkClickable(x, y, 2);
                                 PlayForm.instance.drawO(x, y);
                                 PlayForm.instance.playerTurn = 1;
+                                PlayForm.instance.changeTurnLabel();
                             }
+                            PlayForm.instance.isClickable = true;
                         }
 
                         if (chatData.type == END_GAME)
@@ -517,7 +520,7 @@ namespace ChatApp
                                 Array.Clear(gameArr, 0, gameArr.Length);
                                 PlayForm.instance.Close();
                             }
-                            string messageToDisplay = "Notification: " + $"{globalName} win!";
+                            string messageToDisplay = "Notification: " + $"{chatData.name} has surrendered!";
                             displayLocalMessage(messageToDisplay, 2);
                             updateButton(1);
                         }

@@ -60,11 +60,11 @@
             // turnLabel
             // 
             turnLabel.AutoSize = true;
-            turnLabel.Location = new Point(391, 7);
+            turnLabel.Location = new Point(367, 7);
             turnLabel.Name = "turnLabel";
-            turnLabel.Size = new Size(17, 20);
+            turnLabel.Size = new Size(71, 20);
             turnLabel.TabIndex = 11;
-            turnLabel.Text = "0";
+            turnLabel.Text = "Your Turn";
             // 
             // drawLabel
             // 
@@ -99,6 +99,7 @@
             MaximizeBox = false;
             Name = "PlayForm";
             Text = "Form1";
+            FormClosed += PlayForm_FormClosed;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();

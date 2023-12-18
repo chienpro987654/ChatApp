@@ -14,10 +14,9 @@ namespace ChatApp
         private char clickChar;
         int cellSize = 30;
 
-        bool isServer = false;
         public int playerTurn = 1;
 
-        bool isClickable = true;
+        public bool isClickable = true;
 
         public PlayForm(bool _isServer, int playerSlot, string _client1Id, string _client2Id)
         {
@@ -30,12 +29,11 @@ namespace ChatApp
             clickChar = (playerSlot == 2) ? 'O' : 'X';
             if (_isServer)
             {
-                isServer = true;
-                this.Text = "Admin's Game Screen";
+                this.Text = $"Admin {ChatForm.globalName}'s Game Screen";
             }
             else
             {
-                this.Text = $"Client {playerSlot}'s Game Screen";
+                this.Text = $"Client {playerSlot} - {ChatForm.globalName}'s Game Screen";
             }
             playerRole = playerSlot; // 1:player use X  2: player use Y
             //client1Id = _client1Id;
@@ -43,13 +41,15 @@ namespace ChatApp
             client1Id = ChatForm.instance.client1Id;
             client2Id = ChatForm.instance.client2Id;
 
-            turnLabel.Text = (playerTurn == playerRole) ? "Your Turn" : "Opponent's Turn";
+            changeTurnLabel();
+
         }
 
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
             if (playerTurn == playerRole && isClickable)
             {
+                isClickable = false;
                 int x = (e.X % 30 == 0) ? e.X + 1 : e.X;
                 int y = (e.Y % 30 == 0) ? e.Y + 1 : e.Y;
                 //turnLabel.Text = "You have clicked" + x + "," + y;
@@ -70,7 +70,7 @@ namespace ChatApp
                     }
                 }
                 playerTurn = (playerRole == 1) ? 2 : 1;
-                turnLabel.Text = (playerTurn == playerRole) ? "Your Turn" : "Opponent's Turn";
+                changeTurnLabel();
             }
         }
 
@@ -295,6 +295,17 @@ namespace ChatApp
                 Close();
             }
             isClickable = true;
+        }
+
+        public void changeTurnLabel()
+        {
+            turnLabel.Text = (playerTurn == playerRole) ? "Your Turn" : "Opponent's Turn";
+        }
+
+        private void PlayForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Array.Clear(ChatForm.instance.gameArr, 0, ChatForm.instance.gameArr.Length);
+            ChatForm.instance.playerRole = -1;
         }
     }
 }
