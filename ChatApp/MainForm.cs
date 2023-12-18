@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace ChatApp
 {
     public partial class MainForm : Form
@@ -27,26 +29,26 @@ namespace ChatApp
         private void joinButton_Click(object sender, EventArgs e)
         {
             String name = nameTextBox.Text;
-            //if (name == "")
-            //{
-            //    MessageBox.Show("Please enter your name to start!");
-            //    return;
-            //}
+            if (name == "")
+            {
+                MessageBox.Show("Please enter your name to start!");
+                return;
+            }
             String ip = ipTextBox.Text;
-            //if (!IPAddress.TryParse(ip, out IPAddress ipAddress))
-            //{
-            //    MessageBox.Show("Please Enter A Valid IP Address");
-            //    return;
-            //}
-            //ChatForm chatForm = new ChatForm(name, false, ip);
-            ChatForm chatForm = new ChatForm(false, "192.168.217.1", "John");
+            if (!IPAddress.TryParse(ip, out _))
+            {
+                MessageBox.Show("Please Enter A Valid IP Address");
+                return;
+            }
+            ChatForm chatForm = new ChatForm(false, ip, name);
+            //ChatForm chatForm = new ChatForm(false, "192.168.217.1", "John");
             //ChatForm chatForm = new ChatForm("John", false, "192.168.2.33");
             this.Hide();
             if (!chatForm.IsDisposed)
             {
                 chatForm.ShowDialog();
             }
-            this.Show();
+            Application.Exit();
         }
     }
 }

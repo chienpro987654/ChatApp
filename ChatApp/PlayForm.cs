@@ -1,14 +1,10 @@
 using System.Diagnostics;
-using System.Net.Sockets;
 
 namespace ChatApp
 {
     public partial class PlayForm : Form
     {
         public static PlayForm instance;
-
-        TcpListener server;
-        TcpClient client;
 
         string client1Id;
         string client2Id;
@@ -21,11 +17,15 @@ namespace ChatApp
         bool isServer = false;
         public int playerTurn = 1;
 
+        bool isClickable = true;
+
         public PlayForm(bool _isServer, int playerSlot, string _client1Id, string _client2Id)
         {
             InitializeComponent();
 
             instance = this;
+
+            drawLabel.Hide();
 
             clickChar = (playerSlot == 2) ? 'O' : 'X';
             if (_isServer)
@@ -43,24 +43,16 @@ namespace ChatApp
             client1Id = ChatForm.instance.client1Id;
             client2Id = ChatForm.instance.client2Id;
 
-            if (playerTurn == playerRole)
-            {
-                turnLabel.Text = "Your Turn";
-
-            }
-            else
-            {
-                turnLabel.Text = "Opponent's Turn";
-            }
+            turnLabel.Text = (playerTurn == playerRole) ? "Your Turn" : "Opponent's Turn";
         }
 
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (playerTurn == playerRole)
+            if (playerTurn == playerRole && isClickable)
             {
                 int x = (e.X % 30 == 0) ? e.X + 1 : e.X;
                 int y = (e.Y % 30 == 0) ? e.Y + 1 : e.Y;
-                turnLabel.Text = "You have clicked" + x + "," + y;
+                //turnLabel.Text = "You have clicked" + x + "," + y;
 
                 if (checkClickable(x, y))
                 {
@@ -68,13 +60,17 @@ namespace ChatApp
                     ChatForm.instance.sendGameData($"{x}:{y}", (playerRole == 1) ? client2Id : client1Id, 7);
                     if (checkWin(x, y))
                     {
+                        this.Enabled = false;
                         MessageBox.Show("You win", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly);
                         ChatForm.instance.sendGameData("", (playerRole == 1) ? client2Id : client1Id, 8);
-                        this.Enabled = false;
+                        string messageToDisplay = "Notification: " + $"{ChatForm.globalName} win!";
+                        ChatForm.instance.displayLocalMessage(messageToDisplay, 2);
+                        ChatForm.instance.updateButton(1);
                         Close();
                     }
                 }
                 playerTurn = (playerRole == 1) ? 2 : 1;
+                turnLabel.Text = (playerTurn == playerRole) ? "Your Turn" : "Opponent's Turn";
             }
         }
 
@@ -246,6 +242,59 @@ namespace ChatApp
                 g.DrawLine(blackPen, i * cellSize, 0, i * cellSize, pictureBox1.Height);
                 g.DrawLine(blackPen, 0, i * cellSize, pictureBox1.Width, i * cellSize);
             }
+        }
+
+        private void drawButton_Click(object sender, EventArgs e)
+        {
+            isClickable = false;
+            drawLabel.Show();
+            ChatForm.instance.sendGameData("request", (playerRole == 1) ? client2Id : client1Id, 9);
+        }
+
+        public bool showDrawRequest()
+        {
+            isClickable = false;
+            DialogResult result = MessageBox.Show("Your opponent is request a draw request. Click Yes to Accept", "Draw Request Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly);
+            Enabled = true;
+            if (result == DialogResult.Yes)
+            {
+                Close();
+                return true;
+            }
+            isClickable = true;
+            return false;
+        }
+
+        public void handleDrawReply(bool check)
+        {
+            if (check)
+            {
+                Array.Clear(ChatForm.instance.gameArr, 0, ChatForm.instance.gameArr.Length);
+                string messageToDisplay = "Notification: The battle end as a draw.";
+                ChatForm.instance.displayLocalMessage(messageToDisplay, 2);
+                ChatForm.instance.updateButton(1);
+                Close();
+            }
+            else
+            {
+                isClickable = true;
+                drawLabel.Hide();
+            }
+        }
+
+        private void surrButton_Click(object sender, EventArgs e)
+        {
+            isClickable = false;
+            DialogResult result = MessageBox.Show("Are you sure to surrender", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly);
+            if (result == DialogResult.OK)
+            {
+                ChatForm.instance.sendGameData($"Notification: {ChatForm.globalName} has surrendered", (playerRole == 1) ? client2Id : client1Id, 10);
+                string messageToDisplay = "You lost";
+                ChatForm.instance.displayLocalMessage(messageToDisplay, 2);
+                ChatForm.instance.updateButton(1);
+                Close();
+            }
+            isClickable = true;
         }
     }
 }

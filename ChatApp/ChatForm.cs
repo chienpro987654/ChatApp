@@ -40,6 +40,8 @@ namespace ChatApp
         public const int JOIN_GAME = 6;
         public const int GAME_STEP = 7;
         public const int END_GAME = 8;
+        public const int DRAW_GAME = 9;
+        public const int SURRENDER = 10;
 
         public int[,] gameArr = new int[20, 20];
 
@@ -317,20 +319,60 @@ namespace ChatApp
                         {
                             if (chatData.targetId == globalId)
                             {
+                                PlayForm.instance.Enabled = false;
                                 MessageBox.Show(chatData.name + " win!", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly);
-                                this.Enabled = false;
+                                Array.Clear(gameArr, 0, gameArr.Length);
+                                PlayForm.instance.Close();
+
+                            }
+                            BroadcastMessage(clientMessage, chatData.id);
+                            string messageToDisplay = "Notification: " + $"{chatData.name} win!";
+                            displayLocalMessage(messageToDisplay, 2);
+                            updateButton(1);
+                        }
+
+                        if (chatData.type == DRAW_GAME)
+                        {
+                            if (chatData.targetId == globalId)
+                            {
+                                if (chatData.message == "request")
+                                {
+                                    bool check = PlayForm.instance.showDrawRequest();
+                                    if (check)
+                                    {
+                                        Array.Clear(gameArr, 0, gameArr.Length);
+                                        sendGameData("accept", chatData.id, DRAW_GAME);
+                                        string messageToDisplay = "Notification: The battle end as a draw.";
+                                        displayLocalMessage(messageToDisplay, 2);
+                                        updateButton(1);
+                                    }
+                                    else
+                                    {
+                                        sendGameData("decline", chatData.id, DRAW_GAME);
+                                    }
+                                }
+                                if (chatData.message == "accept" || chatData.message == "decline")
+                                {
+                                    PlayForm.instance.handleDrawReply((chatData.message == "accept") ? true : false);
+                                }
+                            }
+                            BroadcastMessage(clientMessage, chatData.id);
+                        }
+                        if (chatData.type == SURRENDER)
+                        {
+                            if (chatData.targetId == globalId)
+                            {
+                                PlayForm.instance.Enabled = false;
+                                MessageBox.Show("You win!", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly);
+                                Array.Clear(gameArr, 0, gameArr.Length);
                                 PlayForm.instance.Close();
                             }
-                            else
-                            {
-                                string messageToDisplay = chatData.name + " (" + chatData.dateTime + "): " + chatData.message;
-                                displayLocalMessage(messageToDisplay);
-                                BroadcastMessage(clientMessage, chatData.id);
-                                sendChatData($"{chatData.name} win!");
-                                messageToDisplay = "Notification: " + $"{chatData.name} win!";
-                                displayLocalMessage(messageToDisplay);
-                            }
+                            BroadcastMessage(clientMessage, chatData.id);
+                            string messageToDisplay = "Notification: " + $"{globalName} win!";
+                            displayLocalMessage(messageToDisplay, 2);
+                            updateButton(1);
                         }
+
                     }
                 }
             }
@@ -396,23 +438,6 @@ namespace ChatApp
                             }
 
                         }
-
-                        //if (chatData.type == GAME_STEP)
-                        //{
-                        //    Debug.WriteLine(chatData.message);
-                        //    int.TryParse(chatData.message.Split(':')[0], out int x);
-                        //    int.TryParse(chatData.message.Split(':')[1], out int y);
-
-                        //    if (PlayForm.instance.playerRole == 1)
-                        //    {
-                        //        PlayForm.instance.drawX(x, y);
-                        //    }
-                        //    else
-                        //    {
-                        //        PlayForm.instance.drawO(x, y);
-
-                        //    }
-                        //}
                         string messageToDisplay = chatData.name + " (" + chatData.dateTime + "): " + chatData.message;
                         displayLocalMessage(messageToDisplay, chatData.color);
                     }
@@ -447,16 +472,55 @@ namespace ChatApp
                         {
                             if (chatData.targetId == globalId)
                             {
-                                MessageBox.Show(chatData.id + " win!");
-                                this.Enabled = false;
+                                PlayForm.instance.Enabled = false;
+                                MessageBox.Show(chatData.name + " win!", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly);
                                 PlayForm.instance.Close();
+                                Array.Clear(gameArr, 0, gameArr.Length);
                             }
-                            else
-                            {
-
-                            }
+                            string messageToDisplay = "Notification: " + $"{chatData.name} win!";
+                            displayLocalMessage(messageToDisplay, 2);
+                            updateButton(1);
                         }
 
+                        if (chatData.type == DRAW_GAME)
+                        {
+                            if (chatData.targetId == globalId)
+                            {
+                                if (chatData.message == "request")
+                                {
+                                    bool check = PlayForm.instance.showDrawRequest();
+                                    if (check)
+                                    {
+                                        Array.Clear(gameArr, 0, gameArr.Length);
+                                        sendGameData("accept", chatData.id, DRAW_GAME);
+                                        string messageToDisplay = "Notification: The battle end as a draw.";
+                                        displayLocalMessage(messageToDisplay, 2);
+                                        updateButton(1);
+                                    }
+                                    else
+                                    {
+                                        sendGameData("decline", chatData.id, DRAW_GAME);
+                                    }
+                                }
+                                if (chatData.message == "accept" || chatData.message == "decline")
+                                {
+                                    PlayForm.instance.handleDrawReply((chatData.message == "accept") ? true : false);
+                                }
+                            }
+                        }
+                        if (chatData.type == SURRENDER)
+                        {
+                            if (chatData.targetId == globalId)
+                            {
+                                PlayForm.instance.Enabled = false;
+                                MessageBox.Show("You win!", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly);
+                                Array.Clear(gameArr, 0, gameArr.Length);
+                                PlayForm.instance.Close();
+                            }
+                            string messageToDisplay = "Notification: " + $"{globalName} win!";
+                            displayLocalMessage(messageToDisplay, 2);
+                            updateButton(1);
+                        }
 
                     }
                 }
@@ -466,7 +530,7 @@ namespace ChatApp
             Close();
         }
 
-        private void displayLocalMessage(string message, int colorNumber = -1)
+        public void displayLocalMessage(string message, int colorNumber = -1)
         {
             contentTextBox.SelectionColor = (colorNumber == -1) ? Color.Black : colors[colorNumber];
             contentTextBox.AppendText("\r\n" + message);
@@ -525,11 +589,18 @@ namespace ChatApp
 
             if (isServer)
             {
-                TcpClient _client = clientDictionary.FirstOrDefault(x => x.Value == _targetId).Key;
-                NetworkStream stream = _client.GetStream();
-                byte[] messageBytes = Encoding.ASCII.GetBytes(message);
-                stream.Write(messageBytes, 0, messageBytes.Length);
-                stream.Flush();
+                if (_type == END_GAME)
+                {
+                    BroadcastMessage(message);
+                }
+                else
+                {
+                    TcpClient _client = clientDictionary.FirstOrDefault(x => x.Value == _targetId).Key;
+                    NetworkStream stream = _client.GetStream();
+                    byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+                    stream.Write(messageBytes, 0, messageBytes.Length);
+                    stream.Flush();
+                }
             }
             else
             {
@@ -634,31 +705,46 @@ namespace ChatApp
             }
         }
 
-        private void updateButton()
+        public void updateButton(int addAction = -1)
         {
-            if (waitLabel.InvokeRequired)
+            if (addAction == -1)
             {
-                waitLabel.Invoke((Action)(() => waitLabel.Visible = true));
+                if (waitLabel.InvokeRequired)
+                {
+                    waitLabel.Invoke((Action)(() => waitLabel.Visible = true));
+                }
+                else
+                {
+                    waitLabel.Visible = true;
+                }
+                if (joinButton.InvokeRequired)
+                {
+                    joinButton.Invoke((Action)(() => joinButton.Visible = true));
+                }
+                else
+                {
+                    joinButton.Visible = true;
+                }
+                if (startGameButton.InvokeRequired)
+                {
+                    startGameButton.Invoke((Action)(() => startGameButton.Visible = false));
+                }
+                else
+                {
+                    startGameButton.Visible = false;
+                }
             }
             else
             {
-                waitLabel.Visible = true;
-            }
-            if (joinButton.InvokeRequired)
-            {
-                joinButton.Invoke((Action)(() => joinButton.Visible = true));
-            }
-            else
-            {
-                joinButton.Visible = true;
-            }
-            if (startGameButton.InvokeRequired)
-            {
-                startGameButton.Invoke((Action)(() => startGameButton.Visible = false));
-            }
-            else
-            {
-                startGameButton.Visible = false;
+                if (startGameButton.InvokeRequired)
+                {
+                    startGameButton.Invoke((Action)(() => startGameButton.Visible = true));
+                }
+                else
+                {
+                    startGameButton.Visible = true;
+                }
+
             }
         }
 
@@ -693,7 +779,10 @@ namespace ChatApp
         private void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             isChatting = false;
-            PlayForm.instance.Close();
+            if (PlayForm.instance != null)
+            {
+                PlayForm.instance.Close();
+            }
             if (isServer)
             {
                 if (server != null)
@@ -704,7 +793,6 @@ namespace ChatApp
                 {
                     client.Close();
                 }
-                this.Dispose();
             }
         }
     }

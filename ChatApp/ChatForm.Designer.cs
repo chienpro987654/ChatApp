@@ -140,7 +140,6 @@
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
             Name = "ChatForm";
-            Text = "ChatForm";
             FormClosed += ChatForm_FormClosed;
             ResumeLayout(false);
             PerformLayout();

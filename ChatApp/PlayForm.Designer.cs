@@ -29,8 +29,10 @@
         private void InitializeComponent()
         {
             pictureBox1 = new PictureBox();
-            button10 = new Button();
+            drawButton = new Button();
             turnLabel = new Label();
+            drawLabel = new Label();
+            surrButton = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -45,30 +47,53 @@
             pictureBox1.Paint += pictureBox1_Paint;
             pictureBox1.MouseClick += pictureBox1_MouseClick;
             // 
-            // button10
+            // drawButton
             // 
-            button10.Location = new Point(203, 659);
-            button10.Name = "button10";
-            button10.Size = new Size(94, 29);
-            button10.TabIndex = 10;
-            button10.Text = "button10";
-            button10.UseVisualStyleBackColor = true;
+            drawButton.Location = new Point(176, 656);
+            drawButton.Name = "drawButton";
+            drawButton.Size = new Size(94, 29);
+            drawButton.TabIndex = 10;
+            drawButton.Text = "Draw";
+            drawButton.UseVisualStyleBackColor = true;
+            drawButton.Click += drawButton_Click;
             // 
             // turnLabel
             // 
             turnLabel.AutoSize = true;
-            turnLabel.Location = new Point(465, 663);
+            turnLabel.Location = new Point(391, 7);
             turnLabel.Name = "turnLabel";
-            turnLabel.Size = new Size(0, 20);
+            turnLabel.Size = new Size(17, 20);
             turnLabel.TabIndex = 11;
+            turnLabel.Text = "0";
+            // 
+            // drawLabel
+            // 
+            drawLabel.AutoSize = true;
+            drawLabel.Location = new Point(276, 660);
+            drawLabel.Name = "drawLabel";
+            drawLabel.Size = new Size(162, 20);
+            drawLabel.TabIndex = 12;
+            drawLabel.Text = "Sending draw request...";
+            // 
+            // surrButton
+            // 
+            surrButton.Location = new Point(513, 656);
+            surrButton.Name = "surrButton";
+            surrButton.Size = new Size(94, 29);
+            surrButton.TabIndex = 13;
+            surrButton.Text = "Surrender";
+            surrButton.UseVisualStyleBackColor = true;
+            surrButton.Click += surrButton_Click;
             // 
             // PlayForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 709);
+            Controls.Add(surrButton);
+            Controls.Add(drawLabel);
             Controls.Add(turnLabel);
-            Controls.Add(button10);
+            Controls.Add(drawButton);
             Controls.Add(pictureBox1);
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
@@ -81,7 +106,9 @@
 
         #endregion
         private PictureBox pictureBox1;
-        private Button button10;
+        private Button drawButton;
         private Label turnLabel;
+        private Label drawLabel;
+        private Button surrButton;
     }
 }
